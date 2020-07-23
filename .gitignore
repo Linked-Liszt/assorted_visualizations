@@ -1,3 +1,4 @@
 *.vscode*
 *praw.ini
 vis_env
+.ipynb_checkpoints
