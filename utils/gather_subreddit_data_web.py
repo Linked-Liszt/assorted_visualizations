@@ -4,13 +4,16 @@ from datetime import datetime
 import json
 import requests as r
 import time
+import sys
 
-REDDIT = praw.Reddit("personal_bot", user_agent="personal_bot")
-OUT_FP = 'pcm_data.json'
+
+subreddit = sys.argv[1]
+
+OUT_FP = f'{subreddit}_data.json'
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
 }
-URL = 'https://www.reddit.com/r/politicalcompassmemes/top.json?sort=top&t=all'
+URL = f'https://www.reddit.com/r/{subreddit}/top.json?sort=top&t=all'
 
 
 def handle_error(e_str, submission_data):
@@ -23,10 +26,10 @@ def handle_error(e_str, submission_data):
 
 def process_submission(submission, submission_data):
     author_id = submission['author']
-
     if author_id not in submission_data:
+
         submission_data[author_id] = {
-            'flair': submission['author_flair_text'],
+            'flair': remove_none(submission['author_flair_text']),
             'submissions': {}
         }
 
@@ -37,10 +40,16 @@ def process_submission(submission, submission_data):
             'total_awards_received': submission['total_awards_received'],
             'num_comments': submission['num_comments'],
             'score': submission['score'],
-            'upvote_ratio': submission['upvote_ratio']
+            'upvote_ratio': submission['upvote_ratio'],
+            'link_flair_text': remove_none(submission['link_flair_text'])
         }
     else:
-        raise ValueError("Duplicated Post")
+        print(f"Duplicate Post: a: {author_id}, id: {submission['id']}")
+
+def remove_none(text):
+    if text is None:
+        return 'None'
+    return text
 
 def process_page(response_json, submission_data, count):
     submissions = response_json['data']['children']
