@@ -10,14 +10,22 @@ def script_main():
 
     kappa_times, kappa_counts = get_kappa_rate(messages, args.window_size)
 
-    plot_kappa_rate(kappa_times, kappa_counts)
+    plot_kappa_rate(kappa_times, kappa_counts, args.window_size)
 
-def plot_kappa_rate(kappa_times, kappa_counts):
-    with plt.xkcd():
-        plt.plot_date(kappa_times, kappa_counts, linestyle='-')
-        xformatter = mdates.DateFormatter('%H:%M:%S')
-        plt.gcf().axes[0].xaxis.set_major_formatter(xformatter)
-        plt.show()
+def plot_kappa_rate(kappa_times: list, kappa_counts: list, window_size: int) -> None:
+    axis_size = 20
+    tick_size = 15
+    plt.rc('xtick',labelsize=tick_size)
+    plt.rc('ytick',labelsize=tick_size)
+
+    plt.title('Joseph Anderson Stream Entertainment:\n Measured by Chat Kappa\'s', fontsize=30)
+    plt.plot_date(kappa_times, kappa_counts, linestyle='-')
+    plt.xlabel(f'Stream Time ({window_size} second window)', fontsize=axis_size)
+    plt.ylabel('Kappa\'s in Window', fontsize=axis_size)
+    xformatter = mdates.DateFormatter('%H:%M:%S')
+    plt.gcf().axes[0].xaxis.set_major_formatter(xformatter)
+
+    plt.show()
 
 def get_kappa_rate(messages: list, window_size: int) -> (list, list):
     kappa_times = []
@@ -32,12 +40,12 @@ def get_kappa_rate(messages: list, window_size: int) -> (list, list):
             kappa_counts.append(kappa_count)
             window_end += datetime.timedelta(seconds=window_size)
             kappa_count = 0
-        
+
         if 'Kappa' in message.text:
             kappa_count += 1
-    
-    return kappa_times, kappa_counts 
-        
+
+    return kappa_times, kappa_counts
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Graph A sliding window of kappa emoji\'s from twitch chat')
@@ -48,7 +56,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def extract_messages(log_fp: str) -> list:
-    with open(log_fp, 'r') as log_f:
+    with open(log_fp, 'r', encoding='utf-8') as log_f:
         raw_lines = log_f.readlines()
 
     parsed_lines = []
@@ -56,8 +64,8 @@ def extract_messages(log_fp: str) -> list:
         capture = re.search(r'\[(.*)\] <(.*)> (.*)', line)
         # Time, User, Group
 
-        parsed_lines.append(Message(capture.group(1), 
-                                    capture.group(2), 
+        parsed_lines.append(Message(capture.group(1),
+                                    capture.group(2),
                                     capture.group(3)))
     return parsed_lines
 
@@ -72,10 +80,10 @@ class Message:
     def _parse_time(self, time_str):
         split_str = time_str.split(':')
         return datetime.datetime(2000, 1, 1,
-                                hour=int(split_str[0]), 
+                                hour=int(split_str[0]),
                                 minute=int(split_str[1]),
                                 second=int(split_str[2]))
-                            
+
 
 if __name__ == '__main__':
     script_main()
