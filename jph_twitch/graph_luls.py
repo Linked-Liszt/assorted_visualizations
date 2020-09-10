@@ -8,47 +8,47 @@ def script_main():
     args = parse_args()
     messages = extract_messages(args.log_fp)
 
-    kappa_times, kappa_counts = get_kappa_rate(messages, args.window_size)
+    lul_times, lul_counts = get_lul_rate(messages, args.window_size)
 
-    plot_kappa_rate(kappa_times, kappa_counts, args.window_size)
+    plot_lul_rate(lul_times, lul_counts, args.window_size)
 
-def plot_kappa_rate(kappa_times: list, kappa_counts: list, window_size: int) -> None:
+def plot_lul_rate(lul_times: list, lul_counts: list, window_size: int) -> None:
     axis_size = 20
     tick_size = 15
     plt.rc('xtick',labelsize=tick_size)
     plt.rc('ytick',labelsize=tick_size)
 
-    plt.title('Joseph Anderson Stream Entertainment:\n Measured by Chat Kappa\'s', fontsize=30)
-    plt.plot_date(kappa_times, kappa_counts, linestyle='-')
+    plt.title('"Empirical" Stream Entertainment Measurement:\nvia LUL Emote Frequency\n09/09/2020', fontsize=25)
+    plt.plot_date(lul_times, lul_counts, linestyle='-', marker=',')
     plt.xlabel(f'Stream Time ({window_size} second window)', fontsize=axis_size)
-    plt.ylabel('Kappa\'s in Window', fontsize=axis_size)
+    plt.ylabel('LUL Messages in Window', fontsize=axis_size)
     xformatter = mdates.DateFormatter('%H:%M:%S')
     plt.gcf().axes[0].xaxis.set_major_formatter(xformatter)
 
     plt.show()
 
-def get_kappa_rate(messages: list, window_size: int) -> (list, list):
-    kappa_times = []
-    kappa_counts = []
+def get_lul_rate(messages: list, window_size: int) -> (list, list):
+    lul_times = []
+    lul_counts = []
     window_end = datetime.datetime(2000, 1, 1,
                                    minute=int(window_size/60),
                                    second=(window_size % 60))
-    kappa_count = 0
+    lul_count = 0
     for message in messages:
         if message.time.time() > window_end.time():
-            kappa_times.append(window_end)
-            kappa_counts.append(kappa_count)
+            lul_times.append(window_end)
+            lul_counts.append(lul_count)
             window_end += datetime.timedelta(seconds=window_size)
-            kappa_count = 0
+            lul_count = 0
 
-        if 'Kappa' in message.text:
-            kappa_count += 1
+        if 'LUL' in message.text:
+            lul_count += 1
 
-    return kappa_times, kappa_counts
+    return lul_times, lul_counts
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Graph A sliding window of kappa emoji\'s from twitch chat')
+    parser = argparse.ArgumentParser(description='Graph A sliding window of lul emoji\'s from twitch chat')
     parser.add_argument('log_fp', help='IRC formatted log file to read')
     parser.add_argument('--w', default=60, type=int, help='Sliding window size (seconds)', dest='window_size')
 

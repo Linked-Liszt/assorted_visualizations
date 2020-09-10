@@ -1,0 +1,4 @@
+Used Twitch Chat Downloader and IRC chat format.
+
+TCD:
+  https://github.com/PetterKraabol/Twitch-Chat-Downloader
